@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 
 class PersonWebService(service: PersonService, config: Config) {
 
-  lazy val webService: HttpRoutes[IO] =
+  lazy val route: HttpRoutes[IO] =
     HttpRoutes
       .of[IO] {
         case GET -> Root =>
@@ -24,13 +24,14 @@ class PersonWebService(service: PersonService, config: Config) {
 
         case GET -> Root / "person" :? FormatParamMatcher(format) =>
           val (maybeFormatter, contentType) = parseFormat(format)
+          val response =
+            maybeFormatter
+              .map { (formatter: List[Person] => String) =>
+                val persons = service.allPersons.map(formatter)
+                Ok(persons).map(_.withContentType(contentType))
+              }
 
-          maybeFormatter
-            .map { (formatter: List[Person] => String) =>
-              val persons = service.allPersons.map(formatter)
-              Ok(persons).map(_.withContentType(contentType))
-            }
-            .getOrElse(BadRequest(s"Unknown format: $format"))
+          response.getOrElse(BadRequest(s"Unknown format: $format"))
 
         case GET -> Root / "person" =>
           val persons = service.allPersons.map(toJson)
@@ -41,9 +42,9 @@ class PersonWebService(service: PersonService, config: Config) {
           Ok(count).map(_.withContentType(`Content-Type`(MediaType.application.json)))
 
         case GET -> Root / "person" / id =>
-          val person: IO[Option[Person]] = service.person(id)
+          val personIO: IO[Option[Person]] = service.person(id)
 
-          person.flatMap(
+          personIO.flatMap(
             maybePerson =>
               maybePerson
                 .map(p => Ok(toJson(p)).map(_.withContentType(`Content-Type`(MediaType.application.json))))
@@ -59,7 +60,6 @@ class PersonWebService(service: PersonService, config: Config) {
         case badRequest =>
           NotFound(s"Not Found ${badRequest.uri}")
       }
-
 
   val htmlLizer = new HtmlLizer(config)
 

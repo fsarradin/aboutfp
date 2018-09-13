@@ -7,15 +7,15 @@ import org.http4s.server.blaze._
 
 object Main extends IOApp {
 
-  def run(args: List[String]): IO[ExitCode] = {
+  override def run(args: List[String]): IO[ExitCode] = {
     val config     = BnppConfig
     val repository = new PersonMockRepository(persons)
     val service    = new PersonService(repository)
-    val webService = new PersonWebService(service, config).webService
+    val webService = new PersonWebService(service, config)
 
     BlazeBuilder[IO]
       .bindHttp(8080, "localhost")
-      .mountService(webService, "/")
+      .mountService(webService.route, "/")
       .serve
       .compile
       .drain
