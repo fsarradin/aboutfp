@@ -6,7 +6,7 @@ class HtmlLizer(config: Config) {
     val agePart =
       person.age.map(a => s" - $a yo").getOrElse("")
 
-    s"""<li>${person.name}$agePart (id=${person.id}) <span style="color: red;">❤</span> ${config.organizationName}</li>"""
+    s"""<li>${person.name}$agePart (id=${person.id}) <span class="heart">❤</span> ${config.organizationName}</li>"""
   }
 
   def format(persons: List[Person]): String = {
