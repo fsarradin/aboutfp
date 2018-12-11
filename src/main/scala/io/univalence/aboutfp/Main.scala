@@ -14,7 +14,7 @@ object Main extends IOApp {
     val webService = new PersonWebService(service, config)
 
     BlazeBuilder[IO]
-      .bindHttp(8080, "localhost")
+      .bindHttp(9080, "localhost")
       .mountService(webService.route, "/")
       .serve
       .compile
