@@ -17,7 +17,7 @@ class PersonDbRepository(xa: Transactor[IO]) extends PersonRepository {
     val maybeId: Option[Int] = Try { id.toInt }.toOption
 
     if (maybeId.isDefined)
-      sql"SELECT id, name, age FROM person WHERE id = ${maybeId.getOrElse(0)}"
+      sql"SELECT id, name, age FROM person WHERE id = ${maybeId.getOrElse(Int.MinValue)}"
         .query[Person]
         .option
         .transact(xa)
