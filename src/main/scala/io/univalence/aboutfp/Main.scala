@@ -8,7 +8,7 @@ import org.http4s.server.blaze._
 object Main extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
-    val config     = BnppConfig
+    val config     = UpnConfig
     val repository = new PersonMockRepository(persons)
     val service    = new PersonService(repository)
     val webService = new PersonWebService(service, config)
