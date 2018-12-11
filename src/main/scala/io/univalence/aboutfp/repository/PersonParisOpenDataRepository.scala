@@ -20,6 +20,44 @@ class PersonParisOpenDataRepository extends PersonRepository {
   val uri: Uri =
     uri"https://opendata.paris.fr/api/records/1.0/search/?dataset=les-conseillers-de-paris-de-1977-a-2014&rows=100"
 
+  private def getPersons: IO[Map[String, Person]] =
+    getContent
+      .map { content =>
+        val json = parse(content).getOrElse(Json.Null)
+        val records: Seq[Json] =
+          json.hcursor
+            .downField("records")
+            .focus
+            .flatMap(_.asArray)
+            .getOrElse(Seq.empty)
+
+        val now = LocalDate.now()
+
+        val persons: Seq[Either[DecodingFailure, Person]] =
+          for (record <- records)
+            yield {
+              val cursor       = record.hcursor
+              val cursorFields = cursor.downField("fields")
+
+              for {
+                id           <- cursor.downField("recordid").as[String]
+                lastName     <- cursorFields.downField("nom").as[String]
+                firstName    <- cursorFields.downField("prenom").as[String]
+                rawBirthDate <- cursorFields.downField("ne_e_le").as[String]
+              } yield {
+                val birthDate: LocalDate = LocalDate.parse(rawBirthDate)
+                val age: Short           = birthDate.until(now).getYears.toShort
+
+                Person(id, s"$firstName $lastName", Some(age))
+              }
+            }
+
+        persons
+          .flatMap(_.toSeq)
+          .map(p => p.id -> p)
+          .toMap
+      }
+
   private def getContent: IO[String] = {
     implicit val httpBackend: SttpBackend[IO, Nothing] = AsyncHttpClientCatsBackend()
     val backendResource: IO[SttpBackend[IO, Nothing]]  = IO(httpBackend)
@@ -35,41 +73,5 @@ class PersonParisOpenDataRepository extends PersonRepository {
         }
     }(backend => IO(backend.close()))
   }
-
-  private def getPersons: IO[Map[String, Person]] =
-    getContent
-      .map { content =>
-        val json = parse(content).getOrElse(Json.Null)
-        val records =
-          json.hcursor
-            .downField("records")
-            .focus
-            .flatMap(_.asArray)
-            .getOrElse(Vector.empty)
-
-        val now = LocalDate.now()
-
-        val persons: Seq[Seq[Person]] =
-          for (record <- records)
-            yield {
-              val cursor       = record.hcursor
-              val cursorFields = cursor.downField("fields")
-              (for {
-                id           <- cursor.downField("recordid").as[String]
-                lastName     <- cursorFields.downField("nom").as[String]
-                firstName    <- cursorFields.downField("prenom").as[String]
-                rawBirthDate <- cursorFields.downField("ne_e_le").as[String]
-              } yield {
-                val birthDate: LocalDate = LocalDate.parse(rawBirthDate)
-                val age: Short           = birthDate.until(now).getYears.toShort
-
-                Person(id, s"$firstName $lastName", Some(age))
-              }).toSeq
-            }
-
-        persons.flatten
-          .map(p => p.id -> p)
-          .toMap
-      }
 
 }
