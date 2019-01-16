@@ -5,20 +5,20 @@ import doobie.implicits._
 import cats.effect.IO
 import cats.implicits._
 
-object DbMain {
+object DbTool {
   val dbPort   = 32768
   val database = "business"
   val table    = "person"
 
-  def main(args: Array[String]): Unit = {
-    val xa =
-      Transactor.fromDriverManager[IO](
-        driver = "org.postgresql.Driver",
-        url = s"jdbc:postgresql://localhost:$dbPort/$database",
-        user = "postgres",
-        pass = ""
-      )
+  val xa: Transactor[IO] =
+    Transactor.fromDriverManager[IO](
+      driver = "org.postgresql.Driver",
+      url = s"jdbc:postgresql://localhost:$dbPort/$database",
+      user = "postgres",
+      pass = ""
+    )
 
+  def main(args: Array[String]): Unit = {
     initDb(xa)
   }
 
