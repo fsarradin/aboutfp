@@ -3,6 +3,7 @@ lazy val libVersion = new {
   val http4s = "0.19.0-SNAPSHOT"
   val sttp   = "1.3.3"
   val circe  = "0.9.3"
+  val vavr   = "0.9.2"
 }
 
 lazy val root =
@@ -25,7 +26,8 @@ lazy val root =
         "com.softwaremill.sttp" %% "async-http-client-backend-cats" % libVersion.sttp,
         "io.circe"              %% "circe-core"                     % libVersion.circe,
         "io.circe"              %% "circe-generic"                  % libVersion.circe,
-        "io.circe"              %% "circe-parser"                   % libVersion.circe
+        "io.circe"              %% "circe-parser"                   % libVersion.circe,
+        "io.vavr"               % "vavr"                            % libVersion.vavr
       )
     )
     .settings(
