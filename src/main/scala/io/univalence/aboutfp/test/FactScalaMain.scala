@@ -5,7 +5,7 @@ object FactScalaMain {
 
   // Approche impérative
   def fact_ip(n: Int): Int = {
-    var result = 1
+    var result: Int = 1
 
     for (i <- 1 to n) {
       result *= i

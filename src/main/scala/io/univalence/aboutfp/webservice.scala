@@ -11,7 +11,8 @@ import org.http4s.dsl.io._
 import org.http4s.headers._
 import org.http4s.HttpRoutes
 
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
+import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContextExecutorService
 
 class PersonWebService(service: PersonService, config: Config) {
 
@@ -19,15 +20,15 @@ class PersonWebService(service: PersonService, config: Config) {
     HttpRoutes
       .of[IO] {
         case GET -> Root =>
-          val persons = service.allPersons.map(htmlLizer.format)
+          val persons: IO[String] = service.allPersons.map(htmlLizer.format)
           Ok(persons).map(_.withContentType(`Content-Type`(MediaType.text.html)))
 
         case GET -> Root / "person" :? FormatParamMatcher(format) =>
           val (maybeFormatter, contentType) = parseFormat(format)
-          val response =
+          val response: Option[IO[Response[IO]]] =
             maybeFormatter
               .map { (formatter: List[Person] => String) =>
-                val persons = service.allPersons.map(formatter)
+                val persons: IO[String] = service.allPersons.map(formatter)
                 Ok(persons).map(_.withContentType(contentType))
               }
 
@@ -44,12 +45,15 @@ class PersonWebService(service: PersonService, config: Config) {
         case GET -> Root / "person" / id =>
           val personIO: IO[Option[Person]] = service.person(id)
 
-          personIO.flatMap(
-            maybePerson =>
-              maybePerson
+          val result: IO[Response[IO]] =
+            personIO.flatMap { maybePerson =>
+              val value: IO[Response[IO]] = maybePerson
                 .map(p => Ok(toJson(p)).map(_.withContentType(`Content-Type`(MediaType.application.json))))
                 .getOrElse(NotFound(s"unknown person id $id"))
-          )
+              value
+            }
+
+          result
 
         case request @ GET -> "assets" /: asset =>
           val assetFile = assetPath(asset.toList)

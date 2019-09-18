@@ -53,7 +53,7 @@ class PersonParisOpenDataRepository extends PersonRepository {
             }
 
         persons
-          .flatMap(_.toSeq)
+          .flatMap(e => e.toSeq)
           .map(p => p.id -> p)
           .toMap
       }
