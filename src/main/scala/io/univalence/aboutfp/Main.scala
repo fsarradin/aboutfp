@@ -3,12 +3,13 @@ package io.univalence.aboutfp
 import cats.effect._
 import cats.implicits._
 import io.univalence.aboutfp.repository._
+import io.univalence.aboutfp.tool.DbTool
 import org.http4s.server.blaze._
 
 object Main extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
-    val config     = UpnConfig
+    val config     = SgConfig
     val repository = new PersonMockRepository(persons)
     val service    = new PersonService(repository)
     val webService = new PersonWebService(service, config)
