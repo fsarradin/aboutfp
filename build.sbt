@@ -1,9 +1,11 @@
 lazy val libVersion = new {
-  val doobie = "0.5.3"
-  val http4s = "0.19.0-SNAPSHOT"
-  val sttp   = "1.3.3"
-  val circe  = "0.9.3"
-  val vavr   = "0.9.2"
+  val doobie     = "0.5.3"
+  val http4s     = "0.19.0-SNAPSHOT"
+  val sttp       = "1.3.3"
+  val circe      = "0.9.3"
+  val vavr       = "0.9.2"
+  val scalatest  = "3.0.5"
+  val scalacheck = "1.14.0"
 }
 
 lazy val root =
@@ -11,7 +13,7 @@ lazy val root =
     .settings(
       name := "aboutfp",
       version := "0.1",
-      scalaVersion := "2.12.6",
+      scalaVersion := "2.12.10",
     )
     .settings(
       resolvers += Resolver.sonatypeRepo("snapshots")
@@ -27,8 +29,12 @@ lazy val root =
         "io.circe"              %% "circe-core"                     % libVersion.circe,
         "io.circe"              %% "circe-generic"                  % libVersion.circe,
         "io.circe"              %% "circe-parser"                   % libVersion.circe,
-        "io.vavr"               % "vavr"                            % libVersion.vavr
-      )
+        "io.vavr"               % "vavr"                            % libVersion.vavr,
+      ),
+      libraryDependencies ++= Seq(
+        "org.scalatest"  %% "scalatest"  % libVersion.scalatest,
+        "org.scalacheck" %% "scalacheck" % libVersion.scalacheck
+      ).map(_ % Test)
     )
     .settings(
       scalacOptions :=
@@ -40,9 +46,8 @@ lazy val root =
             "-feature", // Emit warning and location for usages of features that should be imported explicitly.
             "-language:existentials", // Existential types (besides wildcard types) can be written and inferred
             "-language:experimental.macros", // Allow macro definition (besides implementation and application)
-            "-language:higherKinds", // Allow higher-kinded types
-            "-language:implicitConversions", // Allow definition of implicit functions called views
-            "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
+            "-language:higherKinds",         // Allow higher-kinded types
+            "-language:implicitConversions", // Allow definition of implicit functions called views           "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
 //            "-Xfatal-warnings", // Fail the compilation if there are any warnings.
             "-Xfuture", // Turn on future language features.
             "-Xlint:adapted-args", // Warn if an argument list is modified to match the receiver.
