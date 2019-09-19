@@ -1,11 +1,11 @@
 lazy val libVersion = new {
-  val doobie     = "0.5.3"
-  val http4s     = "0.19.0-SNAPSHOT"
-  val sttp       = "1.3.3"
-  val circe      = "0.9.3"
+  val doobie     = "0.8.2"
+  val http4s     = "0.20.10"
+  val sttp       = "1.6.7"
+  val circe      = "0.12.1"
   val vavr       = "0.9.2"
-  val scalatest  = "3.0.5"
-  val scalacheck = "1.14.0"
+  val scalatest  = "3.0.8"
+  val scalacheck = "1.14.1"
 }
 
 lazy val root =

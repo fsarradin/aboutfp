@@ -2,18 +2,20 @@ package io.univalence.aboutfp.repository
 
 import java.io.IOException
 import java.time.LocalDate
-
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import io.univalence.aboutfp.Person
 import io.circe._
 import io.circe.parser._
+import scala.concurrent.ExecutionContext
 
 class PersonParisOpenDataRepository extends PersonRepository {
 
   override def allPersons: IO[List[Person]]           = getPersons.map(_.values.toList)
   override def person(id: String): IO[Option[Person]] = getPersons.map(_.get(id))
   override def count: IO[Int]                         = getPersons.map(_.size)
+
+  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
   import com.softwaremill.sttp._
 

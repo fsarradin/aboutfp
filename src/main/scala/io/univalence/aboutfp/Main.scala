@@ -4,6 +4,10 @@ import cats.effect._
 import cats.implicits._
 import io.univalence.aboutfp.repository._
 import io.univalence.aboutfp.tool.DbTool
+import cats.implicits._
+import org.http4s.syntax._
+import org.http4s.implicits._
+import org.http4s.server.Router
 import org.http4s.server.blaze._
 
 object Main extends IOApp {
@@ -14,9 +18,9 @@ object Main extends IOApp {
     val service    = new PersonService(repository)
     val webService = new PersonWebService(service, config)
 
-    BlazeBuilder[IO]
+    BlazeServerBuilder[IO]
       .bindHttp(9080, "localhost")
-      .mountService(webService.route, "/")
+      .withHttpApp(Router("/" -> webService.route).orNotFound)
       .serve
       .compile
       .drain

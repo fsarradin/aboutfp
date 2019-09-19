@@ -17,8 +17,7 @@ import scala.concurrent.ExecutionContextExecutorService
 class PersonWebService(service: PersonService, config: Config) {
 
   lazy val route: HttpRoutes[IO] =
-    HttpRoutes
-      .of[IO] {
+    HttpRoutes.of[IO] {
         case GET -> Root =>
           val persons: IO[String] = service.allPersons.map(htmlLizer.format)
           Ok(persons).map(_.withContentType(`Content-Type`(MediaType.text.html)))
@@ -60,9 +59,6 @@ class PersonWebService(service: PersonService, config: Config) {
           StaticFile
             .fromFile(assetFile, blockingEc, Some(request))
             .getOrElseF(NotFound())
-
-        case badRequest =>
-          NotFound(s"Not Found ${badRequest.uri}")
       }
 
   val htmlLizer = new HtmlLizer(config)

@@ -2,13 +2,16 @@ package io.univalence.aboutfp.tool
 
 import doobie._
 import doobie.implicits._
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import cats.implicits._
+import scala.concurrent.ExecutionContext
 
 object DbTool {
   val dbPort   = 32768
   val database = "business"
   val table    = "person"
+
+  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
   val xa: Transactor[IO] =
     Transactor.fromDriverManager[IO](
